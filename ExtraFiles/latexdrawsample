@@ -1,0 +1,32 @@
+// Code for Kernel Function Declaration
+// Code for portion of input program above pragmas
+// Code correspond to Kernel Variable Declaration
+// Code for allocating memory to Kernel Variable and copying them on device
+// Code for tiling and declaring threads and blocks required for Kernel Execution
+int _CUDA_TILE;
+	int lambda=47;
+	int id_1,id_2,id_3,id_4,id_5;
+	int UB_1=20-0;
+	int UB_2=15-0;
+	for(id_1=1;id_1<=(UB_1*UB_2);id_1+=lambda) {
+		id_2=(id_1/UB_2);
+		id_3=((id_1+lambda)/UB_2);
+		id_4=(id_1%UB_2)-1;
+		id_5=UB_2-((id_1+lambda)%UB_2);
+
+		for(_CUDA_TILE=0;_CUDA_TILE<_NUM_TILE;_CUDA_TILE++)
+			// Code for calling Kernel Function
+cudaDeviceSynchronize();
+
+		for(_CUDA_TILE=0;_CUDA_TILE<_NUM_TILE;_CUDA_TILE++)
+			// Code for calling Kernel Function
+cudaDeviceSynchronize();
+
+		for(_CUDA_TILE=0;_CUDA_TILE<_NUM_TILE;_CUDA_TILE++)
+			// Code for calling Kernel Function
+cudaDeviceSynchronize();
+	}
+// Code for copying Kernel variable from device to host
+// Code for portion of input program below pragmas
+// Code for Kernel Function definition
+

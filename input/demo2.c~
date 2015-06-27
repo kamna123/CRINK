@@ -1,0 +1,23 @@
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+    int X[300][300],Y[300][300],i=0,j;
+    for(i=0;i<300;i++)
+    for(i=0;i<300;i++)
+    {
+        X[i][j]=i+j;
+        Y[i][j]=i+j;
+    }
+    // PARALLELIZE IN CUDA START
+  //  for(i=3;i<=300;i++)
+    for(j=0;j<=300;j++)
+    {
+        X[i+5][j+6]=Y[i-2][j-2]+23;
+        Y[i+4][j+4]=X[i-1][j+1]*Y[i-3][j-3];
+        Z[i+7][j+6]=Z[i-2][j-3];
+    }
+    // PARALLELIZE IN CUDA END
+    return 0;
+}
+

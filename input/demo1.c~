@@ -1,0 +1,59 @@
+#include<stdio.h>
+#include<stdlib.h>
+int main(int argc, char** argv)
+{
+    int N = 1000;
+	int N_NODES = 100;
+	int data = 1;
+	int _NTHREAD = 1, _NBLOCK = 1;
+	char* readfile, *outfile;
+	if(argc>1) _NTHREAD = atoi(argv[1]);
+	if(argc>2) _NBLOCK = atoi(argv[2]);
+	if(argc>3) data = atoi(argv[3]) + 1;
+	if(argc>4) readfile = argv[4];
+	int i,j;
+    FILE* f;
+	f = fopen(readfile, "r");
+	j=0;
+	char c;
+	while(1){
+		c = fgetc(f);
+		if(c=='\n') { 
+			j++;
+			c = fgetc(f);
+			if(c!='%') break;
+		}
+	}
+	fscanf(f, "%d", &N_NODES);
+	//printf("---------%d  ----------",N_NODES);
+	fscanf(f, "%d", &N_NODES);
+	fscanf(f, "%d", &N);
+	if(2*N<_NTHREAD*_NBLOCK) {
+		printf("%d\n",_NTHREAD*_NBLOCK);
+		fclose(f);
+		return 0;
+	}
+    int X[N][N],x;
+    for (i = 0; i < N; i++)
+        {
+                    fscanf(f, "%d", &X[i]);
+                    fscanf(f, "%d", &x);
+            }
+    // PARALLELIZE IN CUDA START
+    for(i=5;i<1000;i++)
+    for(j=8;j<1000;j++)
+    {
+        X[i+20][j+30]=X[i][j];
+    }
+    // PARALLELIZE IN CUDA END
+            
+    // PARALLELIZE IN CUDA START
+    for(i=5;i<1000;i++)
+    for(j=10;j<1000;j++)
+    {
+        X[i+4][j+3]=X[i][j];
+    }
+    // PARALLELIZE IN CUDA END
+    return 0;
+}
+

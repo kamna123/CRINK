@@ -1,0 +1,134 @@
+#ifndef DATASET
+	#define _NTHREAD 512
+	#define _NBLOCK 65535
+#endif
+
+#include<cuda.h>
+#include<time.h>
+
+
+// ----------KERNEL DECLARATION----------
+__global__ void _AFFINE_KERNEL(int* ,int ,int ,int* ,int ,int ,int ,int ,int ,int ,int ,int ,int ,int );
+
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+    int X[300][300],Y[300][300],i,j;
+    for(i=0;i<300;i++)
+    for(i=0;i<300;i++)
+    {
+        X[i][j]=i+j;
+        Y[i][j]=i+j;
+    }
+
+	#ifdef DATASET
+		char* outfile = (char*)malloc(sizeof(char)*(strlen(readfile)+50));
+		strcpy(outfile, readfile);
+		strcat(outfile, ".data");
+		FILE* fp;
+		fp = fopen(outfile, "a");
+	#endif
+
+	#ifdef TIME
+		struct timespec start, end, mid_start, mid_end;
+		double runTime, pre_time, post_time, computeTime;
+	#endif
+	int _SZ_Y_2 = 300;
+	int _SZ_Y_1 = 300;
+	int _SZ_X_2 = 300;
+	int _SZ_X_1 = 300;
+
+	#ifdef TIME
+		clock_gettime(CLOCK_MONOTONIC, &start);
+	#endif
+
+	// ----------Allocating memory to Kernel Variable and copying them on device----------
+	int *_DEV_Y;
+	cudaMalloc((void**) &_DEV_Y, sizeof(int)*_SZ_Y_2*_SZ_Y_1);
+	cudaMemcpy(_DEV_Y, Y, sizeof(int)*_SZ_Y_2*_SZ_Y_1, cudaMemcpyHostToDevice);
+	int *_DEV_X;
+	cudaMalloc((void**) &_DEV_X, sizeof(int)*_SZ_X_2*_SZ_X_1);
+	cudaMemcpy(_DEV_X, X, sizeof(int)*_SZ_X_2*_SZ_X_1, cudaMemcpyHostToDevice);
+
+	// ----------Tiling and declaring threads and blocks required for Kernel Execution----------
+	int _NUM_THREADS = 90000;
+	float _NUM_BLOCKS=1;
+	int _NUM_TILE=1;
+	dim3 _THREADS(512);
+	dim3 _BLOCKS(1);
+	if(_NUM_THREADS < _NTHREAD)
+	{
+		_THREADS.x=300;
+		_THREADS.y=300;
+	}
+	else {
+		_NUM_BLOCKS=(_NUM_THREADS*1.0)/256;
+		_BLOCKS.x=_BLOCKS.y=ceil(sqrt(_NUM_BLOCKS));
+		_THREADS.x=_THREADS.y=ceil(sqrt(90000.0/(_BLOCKS.x*_BLOCKS.y)));
+		int temp=_NUM_BLOCKS;
+		if(_NUM_BLOCKS>_NBLOCK)
+			_NUM_TILE=(temp % _NBLOCK == 0)?(_NUM_BLOCKS/_NBLOCK):((_NUM_BLOCKS/_NBLOCK)+1);
+	}
+
+	#ifdef TIME
+		clock_gettime(CLOCK_MONOTONIC, &mid_start);
+	#endif
+
+	int _CUDA_TILE;
+	for(i=0;i<=297;i+=6)
+	for(j=0;j<=295;j+=5)
+	for(_CUDA_TILE=0;_CUDA_TILE<_NUM_TILE;_CUDA_TILE++)
+	{
+		// ----------KERNEL LAUNCH----------
+		_AFFINE_KERNEL<<<_BLOCKS,_THREADS>>>(_DEV_Y, _SZ_Y_2, _SZ_Y_1, _DEV_X, _SZ_X_2, _SZ_X_1, 2, i, j, 0, 297, 0, 295, _CUDA_TILE);
+		cudaDeviceSynchronize();
+	}
+
+	#ifdef TIME
+		clock_gettime(CLOCK_MONOTONIC, &mid_end);
+	#endif
+
+	// ---------Copying Kernel variable from device to host----------
+	cudaMemcpy(Y, _DEV_Y, sizeof(int)*_SZ_Y_2*_SZ_Y_1, cudaMemcpyDeviceToHost);
+	cudaMemcpy(X, _DEV_X, sizeof(int)*_SZ_X_2*_SZ_X_1, cudaMemcpyDeviceToHost);
+
+	// ---------Releasing the memory allocated to kernel variable----------
+	cudaFree(_DEV_Y);
+	cudaFree(_DEV_X);
+
+	#ifdef TIME
+		clock_gettime(CLOCK_MONOTONIC, &end);
+		pre_time = (double) ((((&mid_start)->tv_sec * 1000000000) + (&mid_start)->tv_nsec) - (((&start)->tv_sec * 1000000000) + (&start)->tv_nsec)) / 1000000000;
+		post_time = (double) ((((&end)->tv_sec * 1000000000) + (&end)->tv_nsec) - (((&mid_end)->tv_sec * 1000000000) + (&mid_end)->tv_nsec)) / 1000000000;
+		computeTime = (double) ((((&mid_end)->tv_sec * 1000000000) + (&mid_end)->tv_nsec) - (((&mid_start)->tv_sec * 1000000000) + (&mid_start)->tv_nsec)) / 1000000000;
+		runTime = (double) ((((&end)->tv_sec * 1000000000) + (&end)->tv_nsec) - (((&start)->tv_sec * 1000000000) + (&start)->tv_nsec)) / 1000000000;
+	#endif
+
+	#ifdef DATASET
+		fprintf(fp,"%d,%d,%d,%d,%d,%.14f,%.14f,%.14f,%.14f,%d\n",N,_NTHREAD*_NBLOCK,_THREADS.x,_BLOCKS.x,data,pre_time,computeTime,post_time,runTime,_CUDA_TILE);
+		fclose(fp);
+		fclose(f);
+	#else
+	#ifdef TIME
+		printf("Runtime:%d\n",runTime);
+	#endif
+	#endif
+    return 0;
+}
+
+
+
+// ----------KERNEL DEFINITION----------
+
+
+__global__ void _AFFINE_KERNEL(int* Y,int _SZ_Y_2,int _SZ_Y_1,int* X,int _SZ_X_2,int _SZ_X_1,int phi_count, int CUDA_i, int CUDA_j, int CUDA_L_i,int CUDA_U_i, int CUDA_L_j,int CUDA_U_j, int _CUDA_TILE)
+{
+	int i = gridDim.x*blockDim.x*_CUDA_TILE + blockDim.x*blockIdx.x + threadIdx.x;
+	int j = gridDim.y*blockDim.y*_CUDA_TILE + blockDim.y*blockIdx.y + threadIdx.y;
+	if((CUDA_i<=i)&&(i<(CUDA_i+6))&&(i<=CUDA_U_i)){
+	if((CUDA_j<=j)&&(j<(CUDA_j+5))&&(j<=CUDA_U_j)){
+		X[(3+i+5)*_SZ_X_1+5+j+6]=Y[(3+i-2)*_SZ_Y_1+5+j-2]+23;
+		Y[(3+i+4)*_SZ_Y_1+5+j+4]=X[(3+i-1)*_SZ_X_1+5+j+1];
+}}}
+

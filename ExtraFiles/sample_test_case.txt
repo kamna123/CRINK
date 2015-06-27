@@ -1,0 +1,109 @@
+yes:dependency exists
+no: dependency doesn't exists
+
+1)  for(j=1;j<=10;j++)
+        a[j]=a[j+10]+10;
+    gcd:yes
+    banerjee:no
+    omega:no
+
+2)  for(j=1;j<=10;j++)
+       a[2*j]=a[4*j+3]+10;
+    gcd,omega: no
+    banerjee: yes(need correction)
+
+3)  for(j=1;j<=9;j++)
+       a[j]=a[10-j]+10;
+    gcd,banerjee,omega: yes
+
+4)  for(j=1;j<=9;j++)
+       a[j]=a[j]+10;
+    gcd,banerjee,omega: yes
+
+5)  for(j=1;j<=9;j++)
+       a[j]=a[10-j]+10;
+    gcd,banerjee,omega: yes
+    
+6)  for(i=1;i<=10;i++)
+     for(j=1;j<=9;j++)
+     {
+       x[i+1][j]=x[i][j+1];
+       }
+    gcd,banerjee,omega: yes
+    
+7)  for(i=1;i<=7;i++)
+     for(j=i;j<=7;j++)
+       x[i+1][j]=x[i][j];  
+    gcd,banerjee,omega: yes
+    loop variable: i: [1,7]+1, j: [i,7]+1  
+    
+8)  for(i=2;i<=20;i++)
+       x[i]=z[i]+1;
+       z[i]=x[i-1]+x[i]+x[i+1];  
+    gcd,banerjee: yes
+    omega: yes
+    
+9)  for(i=2;i<=100;i++)
+     for(j=1;j<=i-1;j++)
+       x[i][j]=x[j][i];    
+    gcd,banerjee: yes
+    omega: no(exactly correct)
+    
+10)  for(i=2;i<=10;i++)
+       a[2*i+2]=a[2*i-2];
+    gcd,banerjee,omega: yes
+    
+11) for(i=1;i<=20;i++)
+     for(j=2;j<=10;j++)
+       a[i+2*j]=a[i+2*j-1]; 
+    gcd,omega: yes
+    banerjee: no
+    
+12) for(i=0;i<=20;i++)
+     for(j=i;j<=20;j++)
+       a[j]=a[2*i+1];  
+    gcd,banerjee,omega: yes
+    
+13) for(i=0;i<=99;i++)
+       a[i+100]=2*a[i];
+    gcd: yes
+    banerjee,omega: no            
+    
+14) for(i=1;i<=10;i++)
+     for(j=1;j<=10;j++)
+     for(k=1;k<=10;k++)
+       z[i+2][2*j+4][3*k-1]=z[2*i-1][j][2*k+1];                  
+    gcd,banerjee,omega: yes
+    
+    /*
+    1)
+    for(i=0;i<20;i++)
+    {
+    for(j=0;j<10;j++)
+    {
+        x[1+2*i+20*j]=x[2+20*i+2*j]+50;
+    }
+    }
+    2)
+    for(i=0;i<20;i++)
+    {
+        x[2*i+3]=x[2*i]+50;
+    }
+    3)
+    for(i=0;i<100;i++)
+    {   for(j=0;j<50;j++)
+        {   for(k=0;k<40;k++)
+            {   x[0+i+2*j-k]=x[0+3*i-j+2*k]+4;
+                }
+             }
+         }
+    4)
+    for(i=1;i<=10;i++)
+     for(j=1;j<=10;j++)
+     {
+        x[i-5][2*j]=x[i+5][j+4]+23;
+        //z[i][j]=a[i]+23;
+        y[2*i-2][3*j]=y[4*i+4][j+6]+23;
+        //z[i][j]=x[2*i][9+j];
+     }  
+*/

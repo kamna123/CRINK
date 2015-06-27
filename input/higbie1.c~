@@ -1,0 +1,24 @@
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+    int XP1[20][20],XS3,i,j,k;
+    for(i=0;i<20;i++)
+    for(j=0;j<20;j++)
+    {
+        XP1[i][j]=i+j;
+    }
+    XS3=4;
+    // PARALLELIZE IN CUDA START
+    for(i=0;i<20;i++)
+    for(j=0;j<20;j++)
+    {
+        XP1(I,J) = XP1(I+NV2,J+NV3)+XS3(I)
+        }
+    // PARALLELIZE IN CUDA END
+    for(i=0;i<20;i++)
+    for(j=0;j<20;j++)
+        printf("%d\t%d\n",x[i][j],y[i][j]);
+    return 0;
+}
+
